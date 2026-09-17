@@ -1,0 +1,34 @@
+name: Check for new publications
+
+on:
+  schedule:
+    - cron: "17 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open the repository
+        uses: actions/checkout@v4
+
+      - name: Check confirmed researchers
+        run: python scripts/check_publications.py
+
+      - name: Request approval for new publications
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/publication-updates
+          delete-branch: true
+          commit-message: "Add newly discovered publications"
+          title: "Review newly discovered Digital Minds publications"
+          body: |
+            The daily publication check found changes for the confirmed researcher list.
+
+            Please review the DOI, publication details, researcher match, and draft blurb. Merge this pull request to approve the records and update the shared Publication Desk. Close it to reject the update.
+          labels: publication-review
+          add-paths: publications.json
