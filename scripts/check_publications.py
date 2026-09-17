@@ -42,7 +42,12 @@ def main():
     found = 0
 
     for researcher in researchers:
-        author_id = researcher.get("openAlexId", "").rstrip("/").split("/")[-1]
+        orcid = researcher.get("orcid", "").replace("https://orcid.org/", "").strip()
+        if orcid:
+            author = get_json(f"https://api.openalex.org/authors/orcid:{urllib.parse.quote(orcid)}")
+            author_id = author.get("id", "").rstrip("/").split("/")[-1]
+        else:
+            author_id = researcher.get("openAlexId", "").rstrip("/").split("/")[-1]
         if not author_id:
             continue
         filters = f"author.id:{author_id},from_publication_date:{from_year}-01-01"
